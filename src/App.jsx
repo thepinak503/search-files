@@ -1,13 +1,14 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import './App.css';
+import { Search, FileText, Music, Video, BookOpen, Package, Settings, ChevronDown, ChevronUp, Sun, Moon } from 'lucide-react';
+import './index.css'; // Use index.css for global styles
 
 const FILE_TYPES = [
-  { label: 'All', value: '', resType: '' },
-  { label: 'TV/Movies', value: 'mkv|mp4|avi|mov|mpg|wmv|divx|mpeg', resType: 'video' },
-  { label: 'Music', value: 'mp3|wav|ac3|ogg|flac|wma|m4a|aac|mod', resType: 'audio' },
-  { label: 'Ebooks', value: 'MOBI|CBZ|CBR|CBC|CHM|EPUB|FB2|LIT|LRF|ODT|PDF|PRC|PDB|PML|RB|RTF|DOC|DOCX', resType: 'ebook' },
-  { label: 'Software', value: 'exe|iso|dmg|tar|7z|bz2|gz|rar|zip|apk', resType: 'archive' },
+  { label: 'All', value: '', resType: '', icon: Search },
+  { label: 'Video', value: 'mkv|mp4|avi|mov|mpg|wmv|divx|mpeg', resType: 'video', icon: Video },
+  { label: 'Music', value: 'mp3|wav|ac3|ogg|flac|wma|m4a|aac|mod', resType: 'audio', icon: Music },
+  { label: 'Ebooks', value: 'MOBI|CBZ|CBR|CBC|CHM|EPUB|FB2|LIT|LRF|ODT|PDF|PRC|PDB|PML|RB|RTF|DOC|DOCX', resType: 'ebook', icon: BookOpen },
+  { label: 'Software', value: 'exe|iso|dmg|tar|7z|bz2|gz|rar|zip|apk', resType: 'archive', icon: Package },
 ];
 
 const ENGINES = [
@@ -19,6 +20,47 @@ const ENGINES = [
   { label: 'FilePursuit', value: 'filepursuit' },
   { label: 'Bing', value: 'bing' },
 ];
+
+// Animation variants
+const containerVariants = {
+  hidden: { opacity: 0, y: -50 },
+  visible: { opacity: 1, y: 0, transition: { duration: 0.8, staggerChildren: 0.1 } },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 20 },
+  visible: { opacity: 1, y: 0 },
+};
+
+const Card = ({ children, className = '' }) => (
+  <motion.div
+    className={`glass-card p-6 sm:p-10 rounded-3xl shadow-2xl ${className}`}
+    initial={{ scale: 0.95 }}
+    animate={{ scale: 1 }}
+    transition={{ duration: 0.5 }}
+  >
+    {children}
+  </motion.div>
+);
+
+const InputField = ({ value, onChange, placeholder, type = 'text', className = '', ...props }) => {
+  const isDarkMode = document.body.classList.contains('dark');
+  const baseClasses = `w-full p-3 rounded-xl border-2 transition duration-300 focus:outline-none focus:ring-4 ${
+    isDarkMode 
+      ? 'bg-gray-700/50 border-gray-600 text-white placeholder-gray-400 focus:border-blue-400 focus:ring-blue-400/30' 
+      : 'bg-white/50 border-gray-300 text-gray-800 placeholder-gray-500 focus:border-blue-500 focus:ring-blue-500/30'
+  }`;
+  return (
+    <input
+      type={type}
+      value={value}
+      onChange={onChange}
+      placeholder={placeholder}
+      className={`${baseClasses} ${className}`}
+      {...props}
+    />
+  );
+};
 
 function App() {
   const [query, setQuery] = useState('');
@@ -109,76 +151,80 @@ function App() {
     localStorage.setItem('searchHistory', JSON.stringify(newHistory));
   };
 
-  const baseInputClasses = `w-full p-3 border-2 rounded-xl focus:ring-4 transition duration-200 ${
-    darkMode ? 'bg-gray-700 border-gray-600 text-white focus:ring-blue-500/50' : 'bg-white border-gray-300 focus:ring-blue-400/50'
-  }`;
-  
-  const buttonBaseClasses = `px-4 py-2 rounded-full font-semibold transition duration-300 shadow-md`;
-  const activeFiletypeClasses = 'bg-blue-600 text-white shadow-lg';
-  const inactiveFiletypeClasses = `${darkMode ? 'bg-gray-600 text-gray-200 hover:bg-blue-500' : 'bg-gray-200 text-gray-700 hover:bg-blue-500 hover:text-white'}`;
-  const engineButtonClasses = `${darkMode ? 'bg-gray-700 border-gray-600 text-white hover:bg-gray-600' : 'bg-white border-gray-300 text-gray-800 hover:bg-gray-100'}`;
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter') {
+      startSearch();
+    }
+  };
 
   return (
-    <div className={`min-h-screen ${darkMode ? 'bg-gray-900 text-white' : 'bg-gradient-to-br from-blue-400 to-purple-600 text-black'}`}>
+    <div className="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-indigo-500 to-purple-700 dark:from-gray-900 dark:to-gray-800">
       <motion.div
-        initial={{ opacity: 0, y: -50 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.8 }}
-        className="container mx-auto p-4 sm:p-8 max-w-4xl"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+        className="w-full max-w-4xl"
       >
-        <motion.h1
-          className="text-center text-5xl font-extrabold mb-4 text-white drop-shadow-lg"
-          whileHover={{ scale: 1.05 }}
-        >
-          Open Directory Finder
-        </motion.h1>
-        <p className="text-center text-white/80 mb-8 text-lg">
-          Get direct download links for almost anything.
-        </p>
+        {/* Header */}
+        <motion.header variants={itemVariants} className="text-center mb-10">
+          <h1 className="text-6xl font-extrabold text-white drop-shadow-lg mb-2">
+            Open Directory Finder
+          </h1>
+          <p className="text-xl text-white/80 font-light">
+            Find direct download links with a powerful, minimalist search.
+          </p>
+        </motion.header>
 
-        <motion.div
-          className={`p-6 sm:p-10 rounded-2xl shadow-2xl ${darkMode ? 'bg-gray-800' : 'bg-white'}`}
-          initial={{ scale: 0.9 }}
-          animate={{ scale: 1 }}
-          transition={{ duration: 0.5 }}
-        >
+        {/* Main Card */}
+        <Card>
           {/* Dark Mode Toggle */}
           <div className="flex justify-end mb-6">
             <motion.button
               onClick={toggleDarkMode}
-              className={`p-2 rounded-full ${darkMode ? 'bg-gray-700 text-yellow-400' : 'bg-gray-200 text-gray-800'}`}
-              whileHover={{ scale: 1.1 }}
+              className="p-3 rounded-full transition duration-300"
+              whileHover={{ scale: 1.1, rotate: 15 }}
               whileTap={{ scale: 0.9 }}
-              title="Toggle Dark Mode"
+              title="Toggle Theme"
             >
-              {darkMode ? '☀️' : '🌙'}
+              {darkMode ? <Sun className="w-6 h-6 text-yellow-400" /> : <Moon className="w-6 h-6 text-indigo-600" />}
             </motion.button>
           </div>
 
-          {/* File Type Selection (Chips) */}
-          <div className="flex flex-wrap justify-center gap-2 mb-6">
-            {FILE_TYPES.map((type) => (
-              <motion.button
-                key={type.label}
-                onClick={() => setFiletypeFunc(type.value, type.resType)}
-                className={`${buttonBaseClasses} text-sm ${fileType === type.value ? activeFiletypeClasses : inactiveFiletypeClasses}`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {type.label}
-              </motion.button>
-            ))}
-          </div>
+          {/* File Type Selection */}
+          <motion.div variants={itemVariants} className="mb-8">
+            <h3 className="text-lg font-semibold mb-3">File Type Filter</h3>
+            <div className="flex flex-wrap gap-3">
+              {FILE_TYPES.map((type) => {
+                const Icon = type.icon;
+                const isActive = fileType === type.value;
+                return (
+                  <motion.button
+                    key={type.label}
+                    onClick={() => setFiletypeFunc(type.value, type.resType)}
+                    className={`flex items-center px-4 py-2 rounded-full font-medium transition duration-300 shadow-md ${
+                      isActive
+                        ? 'bg-blue-600 text-white shadow-blue-500/50'
+                        : 'bg-gray-200/50 text-gray-700 hover:bg-blue-500/70 hover:text-white dark:bg-gray-700/50 dark:text-gray-200 dark:hover:bg-blue-500/70'
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    <Icon className="w-4 h-4 mr-2" />
+                    {type.label}
+                  </motion.button>
+                );
+              })}
+            </div>
+          </motion.div>
 
           {/* Main Search Bar */}
-          <div className="flex flex-col sm:flex-row gap-3 mb-4">
-            <input
-              type="text"
+          <motion.div variants={itemVariants} className="flex flex-col sm:flex-row gap-3 mb-6">
+            <InputField
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && startSearch()}
-              placeholder="Search for a file, e.g., 'The.Blacklist.S01' or 'K.Flay discography'"
-              className={`${baseInputClasses} flex-grow`}
+              onKeyDown={handleKeyDown}
+              placeholder="Search query (e.g., 'The.Blacklist.S01' or 'K.Flay discography')"
+              className="flex-grow"
             />
             <motion.button
               onClick={startSearch}
@@ -186,20 +232,21 @@ function App() {
               whileHover={{ scale: 1.05 }}
               whileTap={{ scale: 0.95 }}
             >
-              Search
+              <Search className="w-5 h-5 inline mr-2" /> Search
             </motion.button>
-          </div>
+          </motion.div>
 
           {/* Advanced Filters Toggle */}
-          <div className="text-center mb-4">
+          <motion.div variants={itemVariants} className="text-center mb-4">
             <motion.button
               onClick={() => setShowAdvanced(!showAdvanced)}
-              className={`text-sm font-medium ${darkMode ? 'text-blue-400 hover:text-blue-300' : 'text-blue-600 hover:text-blue-800'}`}
+              className={`flex items-center justify-center mx-auto text-sm font-medium p-2 rounded-lg ${darkMode ? 'text-blue-400 hover:bg-gray-700/50' : 'text-blue-600 hover:bg-gray-100/50'}`}
               whileHover={{ scale: 1.02 }}
             >
               {showAdvanced ? 'Hide Advanced Filters' : 'Show Advanced Filters'}
+              {showAdvanced ? <ChevronUp className="w-4 h-4 ml-1" /> : <ChevronDown className="w-4 h-4 ml-1" />}
             </motion.button>
-          </div>
+          </motion.div>
 
           {/* Advanced Filters (Collapsible) */}
           <motion.div
@@ -208,53 +255,55 @@ function App() {
             transition={{ duration: 0.3 }}
             className="overflow-hidden"
           >
-            <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-dashed border-gray-300 dark:border-gray-700">
-              <input type="text" placeholder="Min size (e.g. 100MB)" value={minSize} onChange={(e) => setMinSize(e.target.value)} className={baseInputClasses} />
-              <input type="text" placeholder="Max size (e.g. 1GB)" value={maxSize} onChange={(e) => setMaxSize(e.target.value)} className={baseInputClasses} />
-              <input type="date" value={afterDate} onChange={(e) => setAfterDate(e.target.value)} className={baseInputClasses} />
-            </div>
+            <motion.div variants={itemVariants} className="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 border-t border-dashed border-gray-300/50 dark:border-gray-700/50">
+              <InputField type="text" placeholder="Min size (e.g. 100MB)" value={minSize} onChange={(e) => setMinSize(e.target.value)} />
+              <InputField type="text" placeholder="Max size (e.g. 1GB)" value={maxSize} onChange={(e) => setMaxSize(e.target.value)} />
+              <InputField type="date" value={afterDate} onChange={(e) => setAfterDate(e.target.value)} />
+            </motion.div>
           </motion.div>
 
           {/* Engine Selection */}
-          <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-            <h3 className="text-lg font-semibold mb-3">Search Engine:</h3>
+          <motion.div variants={itemVariants} className="mt-8 pt-4 border-t border-gray-300/50 dark:border-gray-700/50">
+            <h3 className="text-lg font-semibold mb-3">Search Engine</h3>
             <div className="flex flex-wrap gap-2">
-              {ENGINES.map((eng) => (
-                <motion.button
-                  key={eng.value}
-                  onClick={() => setEngineFunc(eng.value)}
-                  className={`border ${buttonBaseClasses} text-sm ${engine === eng.value ? 'bg-blue-500 text-white border-blue-500' : engineButtonClasses}`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  {eng.label}
-                </motion.button>
-              ))}
+              {ENGINES.map((eng) => {
+                const isActive = engine === eng.value;
+                return (
+                  <motion.button
+                    key={eng.value}
+                    onClick={() => setEngineFunc(eng.value)}
+                    className={`px-4 py-2 rounded-full text-sm font-medium transition duration-300 ${
+                      isActive
+                        ? 'bg-indigo-500 text-white shadow-indigo-500/50'
+                        : 'bg-gray-200/50 text-gray-700 hover:bg-indigo-500/70 hover:text-white dark:bg-gray-700/50 dark:text-gray-200 dark:hover:bg-indigo-500/70'
+                    }`}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {eng.label}
+                  </motion.button>
+                );
+              })}
             </div>
-          </div>
+          </motion.div>
 
           {/* Recent Searches */}
-          <motion.div
-            className="mt-8 pt-4 border-t border-gray-200 dark:border-gray-700"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.5 }}
-          >
+          <motion.div variants={itemVariants} className="mt-8 pt-4 border-t border-gray-300/50 dark:border-gray-700/50">
             <h3 className="text-xl font-semibold mb-3">Recent Searches</h3>
             <ul className="space-y-1">
               {history.map((item, index) => (
                 <motion.li
                   key={index}
                   whileHover={{ x: 5, backgroundColor: darkMode ? '#374151' : '#f3f4f6' }}
-                  className={`p-2 rounded-lg cursor-pointer ${darkMode ? 'text-gray-300' : 'text-gray-700'}`}
+                  className={`p-2 rounded-lg cursor-pointer transition duration-200 ${darkMode ? 'text-gray-300 hover:bg-gray-700/50' : 'text-gray-700 hover:bg-gray-100/50'}`}
                   onClick={() => setQuery(item)}
                 >
-                  {item}
+                  <FileText className="w-4 h-4 inline mr-2" /> {item}
                 </motion.li>
               ))}
             </ul>
           </motion.div>
-        </motion.div>
+        </Card>
       </motion.div>
     </div>
   );
